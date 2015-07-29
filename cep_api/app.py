@@ -34,7 +34,6 @@ connection = connect(
 api = Api(app)
 
 # This import must be here to avoid circular import
-from cep_api.resources.cep import CepAPI, CepListAPI
+from cep_api.resources.cep import CepAPI
 
-api.add_resource(CepAPI, '/zipcode/<string:zipcode>')
-api.add_resource(CepListAPI, '/zipcode/', endpoint='ceplist')
+api.add_resource(CepAPI, '/zipcode/', '/zipcode/<string:zipcode>/')

@@ -25,8 +25,19 @@ class ZipCode(Document):
         app.logger.info('Add zipcode {} on database'.format(zip_code))
 
     @classmethod
-    def update_zipcode(cls, zipcode_obj):
+    def update_zipcode(cls, zipcode_dict):
+
+        # Object always exists on database
+        zipcode_obj = cls.get_by_zipcode(zipcode_dict.get('cep'))
+
+        zipcode_obj.address = zipcode_dict.get('logradouro')
+        zipcode_obj.neighborhood = zipcode_dict.get('bairro')
+        zipcode_obj.city = zipcode_dict.get('cidade')
+        zipcode_obj.state = zipcode_dict.get('estado')
+        zipcode_obj.zip_code = zipcode_dict.get('cep')
+
         zipcode_obj.save()
+
         app.logger.info('Update zipcode {} on database'.format(zipcode_obj))
 
     @classmethod

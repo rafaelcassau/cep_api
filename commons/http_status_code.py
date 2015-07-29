@@ -2,6 +2,7 @@
 
 
 class Http(object):
+    OK = 200
     CREATED = 201
     NOT_CONTENT = 204
     BAD_REQUEST = 400

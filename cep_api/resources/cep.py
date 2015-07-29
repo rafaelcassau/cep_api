@@ -15,11 +15,10 @@ from commons.utils import model_to_dict, convert_query_set_to_list_dict
 
 class CepAPI(Resource):
 
-    def post(self, zipcode):
-
+    def post(self):
+        zipcode = http_request.form.get('zip_code')
         try:
             zip_code_validator = ZipCodeValidator(zipcode)
-
             if not zip_code_validator.is_valid():
                 raise BadRequest()
 
@@ -37,25 +36,81 @@ class CepAPI(Resource):
             response_to_dict = json.loads(response.content)
             ZipCode.save_zipcode(response_to_dict)
 
-            return {}, Http.CREATED
+            return {'status_code': Http.CREATED}, Http.CREATED
 
         except BadRequest as exception:
             app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(zipcode, exception))
-            return {'message': 'Invalid parameter'}, Http.BAD_REQUEST
+            return {'message': 'Invalid parameter', 'status_code': Http.BAD_REQUEST}, Http.BAD_REQUEST
 
         except Conflict:
             app.logger.error('Zipcode {} already exists on database'.format(zipcode))
-            return {'message': 'Zipcode already exists'}, Http.CONFLICT
+            return {'message': 'Zipcode already exists', 'status_code': Http.CONFLICT}, Http.CONFLICT
 
         except NotFound as exception:
             app.logger.error('Error to add a zipcode {}, this zipcode not found on postmon api, Exception: {}'.format(zipcode, exception))
-            raise {'message': 'Zipcode not found'}, Http.NOT_FOUND
+            return {'message': 'Zipcode not found', 'status_code': Http.NOT_FOUND}, Http.NOT_FOUND
 
         except Exception as exception:
             app.logger.error('Internal server error: {} '.format(exception))
-            return {'message': 'Internal server error, contact the administrator'}, Http.INTERNAL_SERVER_ERROR
+            return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
 
-    def get(self, zipcode):
+    def put(self):
+        zipcode = http_request.form.get('zip_code')
+        try:
+            zip_code_validator = ZipCodeValidator(zipcode)
+
+            if not zip_code_validator.is_valid():
+                raise BadRequest()
+
+            zipcode = zip_code_validator.cleaned_data['zipcode']
+            uri = '{}{}'.format(app.config['POSTMON_BASE_URL'], zipcode)
+            response = requests.get(uri)
+            response_to_dict = json.loads(response.content)
+
+            if ZipCode.zipcode_exists(zipcode):
+                ZipCode.update_zipcode(response_to_dict)
+                return {'message': 'Zipcode updated', 'status_code': Http.OK}, Http.OK
+
+            ZipCode.save_zipcode(response_to_dict)
+            return {'message': 'Zipcode added', 'status_code': Http.CREATED}, Http.CREATED
+
+        except BadRequest as exception:
+            app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(zipcode, exception))
+            return {'message': 'Invalid parameter', 'status_code': Http.BAD_REQUEST}, Http.BAD_REQUEST
+
+        except NotFound as exception:
+            app.logger.error('Error to add a zipcode {}, this zipcode not found on postmon api, Exception: {}'.format(zipcode, exception))
+            return {'message': 'Zipcode not found', 'status_code': Http.NOT_FOUND}, Http.NOT_FOUND
+
+        except Exception as exception:
+            app.logger.error('Internal server error: {} '.format(exception))
+            return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
+
+    def delete(self, zipcode):
+        try:
+            zip_code_validator = ZipCodeValidator(zipcode)
+
+            if not zip_code_validator.is_valid():
+                raise BadRequest()
+
+            zipcode = zip_code_validator.cleaned_data['zipcode']
+            ZipCode.remove_by_zipcode(zipcode)
+
+            return {'status_code': Http.NOT_CONTENT}, Http.NOT_CONTENT
+
+        except BadRequest as exception:
+            app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(zipcode, exception))
+            return {'message': 'Invalid parameter', 'status_code': Http.BAD_REQUEST}, Http.BAD_REQUEST
+
+        except DoesNotExist, exception:
+            app.logger.error('Error to get a zipcode {} on database, Exception: {}'.format(zipcode, exception))
+            return {'message': 'Zipcode not found', 'status_code': Http.NOT_FOUND}, Http.NOT_FOUND
+
+        except Exception as exception:
+            app.logger.error('Internal server error: {} '.format(exception))
+            return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
+
+    def get_by_zipcode(self, zipcode):
         try:
             zip_code_validator = ZipCodeValidator(zipcode)
 
@@ -70,47 +125,24 @@ class CepAPI(Resource):
 
         except BadRequest as exception:
             app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(zipcode, exception))
-            return {'message': 'Invalid parameter'}, Http.BAD_REQUEST
+            return {'message': 'Invalid parameter', 'status_code': Http.BAD_REQUEST}, Http.BAD_REQUEST
 
         except DoesNotExist, exception:
             app.logger.error('Error to get a zipcode {} on database, Exception: {}'.format(zipcode, exception))
-            return {'message': 'Zipcode not found'}, Http.NOT_FOUND
+            return {'message': 'Zipcode not found', 'status_code': Http.NOT_FOUND}, Http.NOT_FOUND
 
         except Exception as exception:
             app.logger.error('Internal server error: {} '.format(exception))
-            return {'message': 'Internal server error, contact the administrator'}, Http.INTERNAL_SERVER_ERROR
+            return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
 
-    def delete(self, zipcode):
-        try:
-            zip_code_validator = ZipCodeValidator(zipcode)
+    def get(self, zipcode=None):
+        if zipcode:
+            return self.get_by_zipcode(zipcode)
 
-            if not zip_code_validator.is_valid():
-                raise BadRequest()
+        return self.get_list()
 
-            zipcode = zip_code_validator.cleaned_data['zipcode']
-            ZipCode.remove_by_zipcode(zipcode)
-
-            return {}, Http.NOT_CONTENT
-
-        except BadRequest as exception:
-            app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(zipcode, exception))
-            return {'message': 'Invalid parameter'}, Http.BAD_REQUEST
-
-        except DoesNotExist, exception:
-            app.logger.error('Error to get a zipcode {} on database, Exception: {}'.format(zipcode, exception))
-            return {'message': 'Zipcode not found'}, Http.NOT_FOUND
-
-        except Exception as exception:
-            app.logger.error('Internal server error: {} '.format(exception))
-            return {'message': 'Internal server error, contact the administrator'}, Http.INTERNAL_SERVER_ERROR
-
-
-class CepListAPI(Resource):
-
-    def get(self):
-
+    def get_list(self):
         limit = ''
-
         try:
             limit = http_request.args.get('limit')
             limit_validator = LimitValidator(limit)
@@ -126,11 +158,8 @@ class CepListAPI(Resource):
 
         except BadRequest as exception:
             app.logger.error('Invalid value to parameter zipcode {}, Exception: {} '.format(limit, exception))
-            return {'message': 'Invalid parameter'}, Http.BAD_REQUEST
+            return {'message': 'Invalid parameter', 'status_code': Http.BAD_REQUEST}, Http.BAD_REQUEST
 
         except Exception as exception:
             app.logger.error('Internal server error: {} '.format(exception))
-            return {'message': 'Internal server error, contact the administrator'}, Http.INTERNAL_SERVER_ERROR
-
-
-
+            return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
