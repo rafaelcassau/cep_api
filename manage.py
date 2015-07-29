@@ -8,7 +8,7 @@ from cep_api.models import ZipCode
 manager = Manager(app)
 
 @manager.command
-def clean_db():
+def clear_db():
     ZipCode.objects.all().delete()
 
 
