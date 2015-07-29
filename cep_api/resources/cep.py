@@ -110,6 +110,12 @@ class CepAPI(Resource):
             app.logger.error('Internal server error: {} '.format(exception))
             return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
 
+    def get(self, zipcode=None):
+        if zipcode:
+            return self.get_by_zipcode(zipcode)
+
+        return self.get_list()
+
     def get_by_zipcode(self, zipcode):
         try:
             zip_code_validator = ZipCodeValidator(zipcode)
@@ -134,12 +140,6 @@ class CepAPI(Resource):
         except Exception as exception:
             app.logger.error('Internal server error: {} '.format(exception))
             return {'message': 'Internal server error, contact the administrator', 'status_code': Http.INTERNAL_SERVER_ERROR}, Http.INTERNAL_SERVER_ERROR
-
-    def get(self, zipcode=None):
-        if zipcode:
-            return self.get_by_zipcode(zipcode)
-
-        return self.get_list()
 
     def get_list(self):
         limit = ''
