@@ -67,8 +67,12 @@ class CepAPI(Resource):
             zipcode = zip_code_validator.cleaned_data['zipcode']
             uri = '{}{}'.format(app.config['POSTMON_BASE_URL'], zipcode)
             response = requests.get(uri)
-            response_to_dict = json.loads(response.content)
 
+            if response.status_code == Http.NOT_FOUND:
+                raise NotFound()
+
+
+            response_to_dict = json.loads(response.content)
             if ZipCode.zipcode_exists(zipcode):
                 zipcode_obj = ZipCode.update_zipcode(response_to_dict)
                 app.logger.info('Update zipcode {} on database'.format(zipcode_obj))
