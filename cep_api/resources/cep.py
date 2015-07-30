@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 
+import json
+
 from flask_restful import Resource
 from flask import request as http_request
 from mongoengine.errors import DoesNotExist
 import requests
-import json
 from werkzeug.exceptions import NotFound, BadRequest, Conflict
+from ..models import ZipCode
 from ..app import app
-from cep_api.models import ZipCode
 from cep_api.resources.validators import ZipCodeValidator, LimitValidator
 from commons.http_status_code import Http
 from commons.utils import model_to_dict, convert_query_set_to_list_dict
@@ -34,7 +35,8 @@ class CepAPI(Resource):
                 raise NotFound()
 
             response_to_dict = json.loads(response.content)
-            ZipCode.save_zipcode(response_to_dict)
+            zip_code = ZipCode.save_zipcode(response_to_dict)
+            app.logger.info('Add zipcode {} on database'.format(zip_code))
 
             return {'status_code': Http.CREATED}, Http.CREATED
 
@@ -68,10 +70,14 @@ class CepAPI(Resource):
             response_to_dict = json.loads(response.content)
 
             if ZipCode.zipcode_exists(zipcode):
-                ZipCode.update_zipcode(response_to_dict)
+                zipcode_obj = ZipCode.update_zipcode(response_to_dict)
+                app.logger.info('Update zipcode {} on database'.format(zipcode_obj))
+
                 return {'message': 'Zipcode updated', 'status_code': Http.OK}, Http.OK
 
-            ZipCode.save_zipcode(response_to_dict)
+            zipcode_obj = ZipCode.save_zipcode(response_to_dict)
+            app.logger.info('Add zipcode {} on database'.format(zipcode_obj))
+
             return {'message': 'Zipcode added', 'status_code': Http.CREATED}, Http.CREATED
 
         except BadRequest as exception:
@@ -94,7 +100,8 @@ class CepAPI(Resource):
                 raise BadRequest()
 
             zipcode = zip_code_validator.cleaned_data['zipcode']
-            ZipCode.remove_by_zipcode(zipcode)
+            zipcode_obj = ZipCode.remove_by_zipcode(zipcode)
+            app.logger.info('Remove zipcode {}'.format(zipcode_obj))
 
             return {'status_code': Http.NOT_CONTENT}, Http.NOT_CONTENT
 
@@ -125,6 +132,8 @@ class CepAPI(Resource):
 
             zipcode = zip_code_validator.cleaned_data['zipcode']
             zipcode_obj = ZipCode.get_by_zipcode(zipcode)
+            app.logger.info('Get zipcode {}'.format(zipcode_obj))
+
             zipcode_dict = model_to_dict(zipcode_obj, exclude=['id'])
 
             return zipcode_dict
@@ -152,6 +161,8 @@ class CepAPI(Resource):
 
             limit = limit_validator.cleaned_data['limit']
             zipcode_list = ZipCode.list(limit)
+            app.logger.info('List zipcodes {}'.format(zipcode_list))
+
             zipcode_list = convert_query_set_to_list_dict(zipcode_list, exclude=['id'])
 
             return zipcode_list

@@ -1,6 +1,5 @@
 from mongoengine.document import Document
 from mongoengine.fields import StringField
-from .app import app
 
 
 class ZipCode(Document):
@@ -13,16 +12,15 @@ class ZipCode(Document):
 
     @classmethod
     def save_zipcode(cls, zipcode_dict):
-        zip_code = ZipCode(
+        zipcode = ZipCode(
             address=zipcode_dict.get('logradouro'),
             neighborhood=zipcode_dict.get('bairro'),
             city=zipcode_dict.get('cidade'),
             state=zipcode_dict.get('estado'),
             zip_code=zipcode_dict.get('cep'),
-        )
-        zip_code.save()
+        ).save()
 
-        app.logger.info('Add zipcode {} on database'.format(zip_code))
+        return zipcode
 
     @classmethod
     def update_zipcode(cls, zipcode_dict):
@@ -38,14 +36,11 @@ class ZipCode(Document):
 
         zipcode_obj.save()
 
-        app.logger.info('Update zipcode {} on database'.format(zipcode_obj))
+        return zipcode_obj
 
     @classmethod
     def get_by_zipcode(cls, zipcode):
         zip_code_obj = cls.objects.get(zip_code=zipcode)
-
-        app.logger.info('Get zipcode {}'.format(zip_code_obj))
-
         return zip_code_obj
 
     @classmethod
@@ -58,8 +53,7 @@ class ZipCode(Document):
     def remove_by_zipcode(cls, zipcode):
         zip_code_obj = cls.objects.get(zip_code=zipcode)
         zip_code_obj.delete()
-
-        app.logger.info('Remove zipcode {}'.format(zip_code_obj))
+        return zip_code_obj
 
     @classmethod
     def list(cls, limit=None):
@@ -73,8 +67,6 @@ class ZipCode(Document):
 
         if zip_code_list.count() > limit:
             zip_code_list = zip_code_list[:limit]
-
-        app.logger.info('List zipcodes {}'.format(zip_code_list))
 
         return zip_code_list
 

@@ -20,8 +20,8 @@ PATH_FILE = '{}/cep_api.log'.format(BASE_DIR)
 
 file_handler = RotatingFileHandler(PATH_FILE, MODE, MAX_BYTES, ROTATE)
 file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s: %(lineno)d]'))
-file_handler.setLevel(logging.DEBUG)
-app.logger.setLevel(logging.DEBUG)
+file_handler.setLevel(logging.INFO)
+app.logger.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 
 #mongo config
