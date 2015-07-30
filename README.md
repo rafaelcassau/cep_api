@@ -2,6 +2,7 @@
 
 * An activated python virtualenv.
 
+Example:
 ```bash
 pip install virtualenv
 virtualenv cep_api_env
@@ -10,14 +11,15 @@ source cep_api_env/bin/activate
 
 * mongodb installed and running.
 
-Example of installation in distributions based on debian
+Example of installation in distributions based on Debian:
 ```
 sudo apt-get install mongodb
 sudo service mongodb start
+```
 
-#### Considering you have already installed and the requirements above:
+#### After installation of the above requirements:
 
-### Installing
+### Installing the project
 
 Clone the repository and install it:
 
