@@ -4,5 +4,4 @@ requests==2.7.0
 nose==1.3.7
 mongoengine==0.10.0
 Flask-Script==2.0.5
-
-# sudo apt-get install mongodb
+coverage==3.7.1
