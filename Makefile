@@ -12,5 +12,5 @@ run:
 	python run.py
 
 .PHONY: test
-test: run
+test:
 	@nosetests -v --with-coverage --cover-package=cep_api --cover-package=commons
