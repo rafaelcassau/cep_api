@@ -49,8 +49,6 @@ MONGO_PORT = 'your mongodb port'
 MONGO_DBNAME = 'your database name'
 ```
 
-#### WARNING: before running the tests is need start the project.
-
 ### Running
 
 Running the application:
@@ -58,6 +56,8 @@ Running the application:
 ```bash
 make run
 ```
+
+#### WARNING: before running the tests is need start the application.
 
 ### Testing
 
