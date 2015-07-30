@@ -50,7 +50,7 @@ MONGO_PORT = 'your mongodb port'
 MONGO_DBNAME = 'your database name'
 ```
 
-#### Warning: before running the tests is need start the project.
+#### WARNING: before running the tests is need start the project.
 
 ### Running
 
