@@ -1,18 +1,17 @@
 ### Requirements
 
 * An activated python virtualenv.
+* mongodb installed and running.
 
-Example:
+Virtualenv installation/activation example:
 ```bash
 pip install virtualenv
 virtualenv cep_api_env
 source cep_api_env/bin/activate
 ```
 
-* mongodb installed and running.
-
-Example of installation in distributions based on Debian:
-```
+MongoDB installation/running example to debian distributions:
+```bash
 sudo apt-get install mongodb
 sudo service mongodb start
 ```
@@ -41,7 +40,7 @@ make install
 
 ### After installling
 
-After installing the app, edit the `cep_api/config.py` file with information about your mongodb running instance
+After installing the app, edit the `config.py` file with information about your mongodb running instance
 
 ```python
 
