@@ -16,7 +16,7 @@ sudo apt-get install mongodb
 sudo service mongodb start
 ```
 
-#### After installation of the above requirements:
+#### After installation all of the above requirements:
 
 ### Installing the project
 
